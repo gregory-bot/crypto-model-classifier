@@ -1,193 +1,191 @@
-# Crypto Buy/Sell Classification Capstone Project
+# Crypto Buy/Sell Classification — Capstone Project
 
-## End-to-End Machine Learning Pipeline Using Real Binance Data
+A reproducible end-to-end pipeline that builds a Buy / Sell / Hold classifier for cryptocurrency markets using historical OHLCV data from the Binance API. The repository includes data ingestion, cleaning, feature engineering, label generation, model training, evaluation, backtesting and model serialization.
 
----
+## Key Features
+- Fetches real Binance OHLCV data (configurable symbol / interval)
+- Stores raw and processed datasets under `data/`
+- Computes technical indicators and engineered features
+- Rule-based label generation (Buy / Sell / Hold)
+- Train/evaluate multiple classifiers (Random Forest, XGBoost, LightGBM, etc.)
+- Backtesting utilities and model serialization
 
-## 1. Project Overview
-
-This capstone project builds a **Buy/Sell/Hold classifier** for cryptocurrency markets using **real data from the Binance API**.  
-The goal is to create a fully functioning ML system that:
-
-- Fetches real historical crypto data
-- Cleans and engineers features
-- Calculates technical indicators
-- Generates labels for Buy/Sell/Hold
-- Trains a classification model
-- Evaluates performance and backtests strategy
-- Serializes the trained model
-- Deploys prediction logic (optional)
-
-This workflow simulates a realistic applied-finance ML project.
-
----
-
-## 2. Data Sources
-
-### Binance API
-
-- Endpoint: `/api/v3/klines`
-- Provides OHLCV (Open, High, Low, Close, Volume)
-- Supports multiple intervals (1m, 1h, 1d)
-
-Example URL: https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000
-
-## 3. Project Structure
+## Repository structure
+```
 crypto-classifier/
-│── data/
-│ ├── raw/
-│ ├── processed/
-│── notebooks/
-│ ├── 01_fetch_data.ipynb
-│ ├── 02_feature_engineering.ipynb
-│ ├── 03_model_training.ipynb
-│ ├── 04_evaluation.ipynb
-│── src/
-│ ├── data_fetcher.py
-│ ├── feature_generator.py
-│ ├── labeler.py
-│ ├── train.py
-│ ├── predict.py
-│── models/
-│── README.md
-│── requirements.txt
+├── data/
+│   ├── raw/             # Raw CSV from API
+│   └── processed/       # Cleaned data used for modeling
+├── notebooks/           # EDA and experiments
+├── src/                 # Scripts and reusable modules
+│   ├── data_fetcher.py
+│   ├── feature_generator.py
+│   ├── labeler.py
+│   ├── train.py
+│   └── predict.py
+├── models/              # Serialized model artifacts
+├── README.md
+└── requirements.txt
+```
 
+## Quickstart
 
----
+1. Create and activate a virtual environment, then install dependencies:
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-## 4. Step-by-Step Documentation
+2. Fetch raw data (saves to `data/raw/`):
+```powershell
+python src\data_fetcher.py
+```
 
-### Step 1 — Fetch Data From Binance
+3. Clean and generate features (saves to `data/processed/`):
+```powershell
+python src\feature_generator.py
+```
 
-**`data_fetcher.py`**:  
-Fetch raw OHLCV data, convert to DataFrame, save CSV in `data/raw/`.
+4. Train model:
+```powershell
+python src\train.py
+```
 
+5. Predict / evaluate:
+```powershell
+python src\predict.py
+```
+
+## Data
+- Source: Binance `/api/v3/klines` (OHLCV)
+- Raw CSV saved to `data/raw/`
+- Cleaned/processed CSV saved to `data/processed/` with:
+  - timestamps converted to datetime
+  - numeric columns cast to float
+  - unnecessary columns removed
+  - sensible index (e.g., open_time)
+
+## Feature examples
+- 1-day and 7-day returns
+- Rolling volatility
+- SMA20, SMA50, SMA200
+- RSI, MACD, Bollinger Bands, Stochastic Oscillator
+
+(Use `ta` or `ta-lib` to compute indicators; see `notebooks/` for examples.)
+
+## Labeling (example rule)
+- BUY  = next_day_return > +2%
+- SELL = next_day_return < −2%
+- HOLD = otherwise
+
+Implementation example:
 ```python
-import requests
-import pandas as pd
+df["future_return"] = df["close"].pct_change().shift(-1)
+df["label"] = df["future_return"].apply(lambda r: 2 if r>0.02 else (0 if r<-0.02 else 1))
+```
 
-def fetch_binance(symbol="BTCUSDT", interval="1d", limit=1000):
-    url = "https://api.binance.com/api/v3/klines"
-    params = {"symbol": symbol, "interval": interval, "limit": limit}
-    response = requests.get(url, params=params)
-    data = response.json()
-    df = pd.DataFrame(data)
-    df.columns = ["open_time","open","high","low","close","volume",
-                  "close_time","quote_asset_volume","num_trades",
-                  "taker_base_volume","taker_quote_volume","ignore"]
-    return df
-    
+## Evaluation & Backtest
+- Metrics: accuracy, macro F1, precision/recall for BUY, confusion matrix
+- Backtesting: simulate strategy (starting capital, position sizing, transaction costs) using model signals; compare vs buy-and-hold baseline
 
-Step 2 — Data Cleaning & Processing
+## Contributing
+- Keep raw data in `data/raw/` and processed outputs in `data/processed/`
+- Add notebooks and experiments under `notebooks/`
+- Place trained artifacts under `models/`
+- Open issues or PRs with reproducible steps
 
-Convert timestamps → datetime
+## License
+MIT License — include a LICENSE file if required.
 
-Numeric columns → float
+## Contact
+Open an issue in this repository for questions, suggestions or reproducibility requests.
+```// filepath: c:\Users\HP\Desktop\crypto-classifier\README.md
+# Crypto Buy/Sell Classification — Capstone Project
 
-Drop unused columns
-      df["open_time"] = pd.to_datetime(df["open_time"], unit='ms')
-df["close"] = df["close"].astype(float)
+A reproducible end-to-end pipeline that builds a Buy / Sell / Hold classifier for cryptocurrency markets using historical OHLCV data from the Binance API. The repository includes data ingestion, cleaning, feature engineering, label generation, model training, evaluation, backtesting and model serialization.
 
-Store cleaned data in data/processed/.
+## Key Features
+- Fetches real Binance OHLCV data (configurable symbol / interval)
+- Stores raw and processed datasets under `data/`
+- Computes technical indicators and engineered features
+- Rule-based label generation (Buy / Sell / Hold)
+- Train/evaluate multiple classifiers (Random Forest, XGBoost, LightGBM, etc.)
+- Backtesting utilities and model serialization
 
+## Repository structure
+```
+crypto-classifier/
+├── data/
+│   ├── raw/             # Raw CSV from API
+│   └── processed/       # Cleaned data used for modeling
+├── notebooks/           # EDA and experiments
+├── src/                 # Scripts and reusable modules
+│   ├── data_fetcher.py
+│   ├── feature_generator.py
+│   ├── labeler.py
+│   ├── train.py
+│   └── predict.py
+├── models/              # Serialized model artifacts
+├── README.md
+└── requirements.txt
+```
 
+## Quickstart
 
-Step 3 — Feature Engineering
-Returns
+1. Create and activate a virtual environment, then install dependencies:
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-1-day return
+2. Fetch raw data (saves to `data/raw/`):
+```powershell
+python src\data_fetcher.py
+```
 
-7-day return
+3. Clean and generate features (saves to `data/processed/`):
+```powershell
+python src\feature_generator.py
+```
 
-Rolling volatility
+4. Train model:
+```powershell
+python src\train.py
+```
 
-Technical Indicators (using ta or ta-lib)
+5. Predict / evaluate:
+```powershell
+python src\predict.py
+```
 
-RSI
+## Data
+- Source: Binance `/api/v3/klines` (OHLCV)
+- Raw CSV saved to `data/raw/`
+- Cleaned/processed CSV saved to `data/processed/` with:
+  - timestamps converted to datetime
+  - numeric columns cast to float
+  - unnecessary columns removed
+  - sensible index (e.g., open_time)
 
-MACD
+## Feature examples
+- 1-day and 7-day returns
+- Rolling volatility
+- SMA20, SMA50, SMA200
+- RSI, MACD, Bollinger Bands, Stochastic Oscillator
 
-SMA20, SMA50, SMA200
+(Use `ta` or `ta-lib` to compute indicators; see `notebooks/` for examples.)
 
-Bollinger Bands
+## Labeling (example rule)
+- BUY  = next_day_return > +2%
+- SELL = next_day_return < −2%
+- HOLD = otherwise
 
-Stochastic Oscillator
-     
-     import ta
+Implementation example:
+```python
+df["future_return"] = df["close"].pct_change().shift(-1)
+df["label"] = df["future_return"].apply(lambda r: 2 if r>0.02 else (0 if r<-0.02 else 1))
+```
 
-df["rsi"] = ta.momentum.RSIIndicator(df["close"]).rsi()
-df["sma_20"] = df["close"].rolling(20).mean()
-
-
-Step 4 — Label Generation (Target Variable)
-
-Rule-based labeling: 
-     If next_day_return > +2% → BUY  
-If next_day_return < –2% → SELL  
-Else → HOLD
-
-
-     df["future_return"] = df["close"].pct_change().shift(-1)
-
-def label(row):
-    if row["future_return"] > 0.02:
-        return 2
-    elif row["future_return"] < -0.02:
-        return 0
-    else:
-        return 1
-
-df["label"] = df.apply(label, axis=1)
-
-
-Step 5 — Train/Test Split
-
-70% training
-
-15% validation
-
-15% test
-
-No shuffling (time-series data)
-
-Step 6 — Model Training
-
-Test multiple classifiers:
-
-Logistic Regression
-
-Random Forest
-
-XGBoost / LightGBM / CatBoost
-
-LSTM/GRU (optional)
-    
-    from xgboost import XGBClassifier
-
-model = XGBClassifier()
-model.fit(X_train, y_train)
-
-
-Step 7 — Evaluation
-
-Metrics:
-
-Accuracy
-
-Macro F1-score
-
-Precision/Recall for BUY class
-
-Confusion matrix
-
-Backtesting: simulate strategy starting with $10,000.
-
-Step 8 — Serialize the Model
-      import joblib
-joblib.dump(model, "models/buy_sell_classifier.pkl")
-
-Step 9 — Prediction Pipeline
-      def predict(features):
-    model = joblib.load("models/buy_sell_classifier.pkl")
-    return model.predict(features)
-
+##

@@ -1,4 +1,4 @@
-# Crypto Buy/Sell Classification — Capstone Project
+# Crypto Buy/Sell Classification Project
 
 A reproducible end-to-end pipeline that builds a Buy / Sell / Hold classifier for cryptocurrency markets using historical OHLCV data from the Binance API. The repository includes data ingestion, cleaning, feature engineering, label generation, model training, evaluation, backtesting and model serialization.
 
